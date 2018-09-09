@@ -1,24 +1,33 @@
 <?php
-function getStockQuote($symbol) {
-$conn=mysqli_connect('localhost','root','','soap');
-$query = "SELECT stock_price FROM stockprices "
-. "WHERE stock_symbol = '$symbol'";
-$result = mysqli_query($conn,$query);
-$row = mysqli_fetch_assoc($result); 
-return $row['stock_price'];
-}
-require('lib/nusoap.php');
-$server = new soap_server();
-$server->configureWSDL('stockserver', 'urn:stockquote');
-$server->register("getStockQuote",
-array('symbol' => 'xsd:string'),
-array('return' => 'xsd:decimal'),
-'urn:stockquote',
-'urn:stockquote#getStockQuote');
-// $HTTP_RAW_POST_DATA = isset($HTTP_RAW_POST_DATA)
-// ? $HTTP_RAW_POST_DATA : '';
-// $server->service($HTTP_RAW_POST_DATA);
- $result = file_get_contents('php://input');
+require_once('stock.php');
 
+function getStockQuote($symbol)
+{
+    
+    $conn = new Connection();
+    
+    $getStockPrice = $conn->getStockPrice($symbol);
+    
+    return $getStockPrice;
+    
+}
+
+require('lib/nusoap.php');
+//create a new soap serverfrom class nusoap_server in nusoap function
+$server = new nusoap_server();
+// it was called to provide the name and the namespace of the service which means configure our WSDL
+$server->configureWSDL('stockserver', 'urn:stockquote');
+// register the class method and the params of the method such as it's input and output data type and name
+$server->register("getStockQuote", array(
+    'symbol' => 'xsd:string'
+), array(
+    'return' => 'xsd:decimal'
+), 'urn:stockquote', 'urn:stockquote#getStockQuote');
+
+//get post value in php version 7 it was written as below, means Get our posted data if the service is being consumed
+$result = file_get_contents('php://input');
+
+
+// pass our posted data (or nothing) to the soap service 
 $server->service($result);
 ?>
