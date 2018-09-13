@@ -3,13 +3,9 @@ require_once('stock.php');
 
 function getStockQuote($symbol)
 {
-    
-    $conn = new Connection();
-    
-    $getStockPrice = $conn->getStockPrice($symbol);
-    
-    return $getStockPrice;
-    
+	$conn = new Stock();
+	$getStockPrice = $conn->getStockPrice($symbol);
+	return $getStockPrice;
 }
 
 require('lib/nusoap.php');
